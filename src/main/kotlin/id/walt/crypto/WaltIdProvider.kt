@@ -4,7 +4,8 @@ import id.walt.Values
 import java.security.Provider
 
 class WaltIdProvider : Provider(
-    "Walt", Values.version,
+    //"Walt", Values.version,
+    "Walt", 1.0,
     "Walt Security Provider, supporting signatures with following algorithms [ES256k, Ed25519]"
 ) {
     init {
