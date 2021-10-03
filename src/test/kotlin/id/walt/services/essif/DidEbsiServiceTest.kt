@@ -12,6 +12,7 @@ import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 
 class DidEbsiServiceTest : AnnotationSpec() {
 

@@ -12,6 +12,7 @@ import id.walt.services.did.DidService
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 
 @Deprecated(message = "New version in package id.walt.service.did")
 class DidServiceTest : AnnotationSpec() {
