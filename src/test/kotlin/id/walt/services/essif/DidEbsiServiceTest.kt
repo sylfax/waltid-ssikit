@@ -42,8 +42,8 @@ class DidEbsiServiceTest : AnnotationSpec() {
     @Before
     fun setup() {
         Files.copy(
-            Path.of("src", "test", "resources", "ebsi", DID_FILENAME),
-            Path.of("data", "did", "created", DID_FILENAME)
+            Paths.get("src", "test", "resources", "ebsi", DID_FILENAME),
+            Paths.get("data", "did", "created", DID_FILENAME)
         )
         keyStore.store(key)
         keyStore.addAlias(KEY_ID, DID)
@@ -52,7 +52,7 @@ class DidEbsiServiceTest : AnnotationSpec() {
 
     @After
     fun clean() {
-        Files.delete(Path.of("data", "did", "created", DID_FILENAME))
+        Files.delete(Paths.get("data", "did", "created", DID_FILENAME))
         keyStore.delete(KEY_ID.id)
     }
 

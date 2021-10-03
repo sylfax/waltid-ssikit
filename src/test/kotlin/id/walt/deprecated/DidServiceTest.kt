@@ -73,7 +73,7 @@ class DidServiceTest : AnnotationSpec() {
 
     @Test
     fun listDidTest() {
-        Files.createDirectories(Path.of("data/did/created"))
+        Files.createDirectories(Paths.get("data/did/created"))
         val ds = DidService
         val dids = ds.listDids()
         println(dids)

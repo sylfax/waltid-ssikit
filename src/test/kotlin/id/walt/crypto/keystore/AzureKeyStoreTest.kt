@@ -48,8 +48,8 @@ class AzureKeyStoreTest : AnnotationSpec() {
 
     @After
     fun cleanup() {
-        Files.delete(Path.of("data", "key", "Alias-${did.replace(":", "-")}"))
-        Files.delete(Path.of("data", "key", "Alias-${did.replace(":", "-")}#106"))
+        Files.delete(Paths.get("data", "key", "Alias-${did.replace(":", "-")}"))
+        Files.delete(Paths.get("data", "key", "Alias-${did.replace(":", "-")}#106"))
 
         unmockkConstructor(KeyVaultClient::class)
         unmockkObject(PropertySource)

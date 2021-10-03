@@ -15,6 +15,7 @@ import info.weboftrust.ldsignatures.LdProof
 import mu.KotlinLogging
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.*
 
 private val log = KotlinLogging.logger {}
@@ -92,7 +93,7 @@ open class WaltIdJwtCredentialService : JwtCredentialService() {
     }
 
     override fun listVCs(): List<String> =
-        Files.walk(Path.of("data/vc/created"))
+        Files.walk(Paths.get("data/vc/created"))
             .filter { Files.isRegularFile(it) }
             .filter { it.toString().endsWith(".json") }
             .map { it.fileName.toString() }.toList()

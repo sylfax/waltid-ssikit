@@ -28,6 +28,7 @@ import id.walt.signatory.ProofType
 import java.net.URI
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.*
 
 private val log = KotlinLogging.logger {}
@@ -320,7 +321,7 @@ open class WaltIdJsonLdCredentialService : JsonLdCredentialService() {
     }
 
     override fun listVCs(): List<String> {
-        return Files.walk(Path.of("data/vc/created"))
+        return Files.walk(Paths.get("data/vc/created"))
             .filter { Files.isRegularFile(it) }
             .filter { it.toString().endsWith(".json") }
             .map { it.fileName.toString() }.toList()
@@ -369,7 +370,7 @@ open class WaltIdJsonLdCredentialService : JsonLdCredentialService() {
     }
 
     /*override fun listTemplates(): List<String> {
-        return Files.walk(Path.of("templates"))
+        return Files.walk(Paths.get("templates"))
             .filter { Files.isRegularFile(it) }
             .filter { it.toString().endsWith(".json") }
             .map { it.fileName.toString().replace("vc-template-", "").replace(".json", "") }.toList()

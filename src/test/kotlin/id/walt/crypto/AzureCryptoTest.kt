@@ -44,7 +44,7 @@ class AzureCryptoTest : AnnotationSpec() {
 
     @After
     fun cleanup() {
-        val aliasFile = Path.of("data", "key", "Alias-ForTesting")
+        val aliasFile = Paths.get("data", "key", "Alias-ForTesting")
         if (Files.exists(aliasFile))
             Files.delete(aliasFile)
     }

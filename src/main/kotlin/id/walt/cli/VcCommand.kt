@@ -24,6 +24,7 @@ import io.ktor.util.date.*
 import mu.KotlinLogging
 import java.io.File
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.sql.Timestamp
 import java.time.LocalDateTime
 
@@ -77,7 +78,7 @@ class VcIssueCommand : CliktCommand(
 
         // Saving VC to file
         val vcFileName = "vc-$vcId-${template}.json"
-        HKVStoreService.getService().put(Path.of("vc", "created", vcFileName), vcStr)
+        HKVStoreService.getService().put(Paths.get("vc", "created", vcFileName), vcStr)
 
         log.debug { "Writing VC to file $vcFileName" }
 

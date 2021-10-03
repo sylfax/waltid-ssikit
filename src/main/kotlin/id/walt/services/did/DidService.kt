@@ -19,6 +19,7 @@ import org.bouncycastle.asn1.ASN1BitString
 import org.bouncycastle.asn1.ASN1Sequence
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.*
 
 private val log = KotlinLogging.logger {}
@@ -308,14 +309,14 @@ object DidService {
     private fun resolveAndStore(didUrl: String) = storeDid(didUrl, resolve(didUrl).encodePretty())
 
     private fun storeDid(didUrlStr: String, didDoc: String) =
-        HKVStoreService.getService().put(Path.of("did", "created", "${didUrlStr.replace(":", "-")}.json"), didDoc)
+        HKVStoreService.getService().put(Paths.get("did", "created", "${didUrlStr.replace(":", "-")}.json"), didDoc)
 
     private fun loadDid(didUrlStr: String) =
-        HKVStoreService.getService().getAsString(Path.of("did", "created", "${didUrlStr.replace(":", "-")}.json"))
+        HKVStoreService.getService().getAsString(Paths.get("did", "created", "${didUrlStr.replace(":", "-")}.json"))
 
 
     fun listDids(): List<String> =
-        HKVStoreService.getService().listChildKeys(Path.of("did", "created")).map { it.toString().substringAfter("did/created/").replace("-", ":") }.toList()
+        HKVStoreService.getService().listChildKeys(Paths.get("did", "created")).map { it.toString().substringAfter("did/created/").replace("-", ":") }.toList()
 
 
     // TODO: consider the methods below. They might be deprecated!

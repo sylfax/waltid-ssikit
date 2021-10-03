@@ -4,11 +4,12 @@ import id.walt.servicematrix.ServiceConfiguration
 import io.ktor.util.*
 import java.io.File
 import java.nio.file.Path
+import java.nio.file.Paths
 
 data class FilesystemStoreConfig(
     val dataRoot: String
 ) : ServiceConfiguration {
-    val dataDirectory: Path = Path.of(dataRoot)
+    val dataDirectory: Path = Paths.get(dataRoot)
 }
 
 class FileSystemHKVStore(configurationPath: String) : HKVStoreService() {

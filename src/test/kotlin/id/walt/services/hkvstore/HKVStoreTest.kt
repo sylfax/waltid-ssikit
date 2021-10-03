@@ -13,19 +13,19 @@ class HKVStoreTest : StringSpec({
         val testData = "test data"
 
         println("Adding items...")
-        hkvStore.put(Path.of("parent", "child", "leaf"), testData)
-        hkvStore.put(Path.of("parent", "child2", "leaf2"), testData)
+        hkvStore.put(Paths.get("parent", "child", "leaf"), testData)
+        hkvStore.put(Paths.get("parent", "child2", "leaf2"), testData)
 
         println("Retrieving items...")
-        hkvStore.listChildKeys(Path.of("parent"), true) shouldHaveSize 2
-        hkvStore.listChildKeys(Path.of("parent", "child")) shouldHaveSize 1
+        hkvStore.listChildKeys(Paths.get("parent"), true) shouldHaveSize 2
+        hkvStore.listChildKeys(Paths.get("parent", "child")) shouldHaveSize 1
 
         println("Retrieving data...")
-        hkvStore.getAsString(Path.of("parent", "child", "leaf")) shouldBe testData
+        hkvStore.getAsString(Paths.get("parent", "child", "leaf")) shouldBe testData
 
         println("Deleting items...")
-        hkvStore.delete(Path.of("parent"), true)
-        hkvStore.listChildKeys(Path.of("parent"), true) shouldHaveSize 0
+        hkvStore.delete(Paths.get("parent"), true)
+        hkvStore.listChildKeys(Paths.get("parent"), true) shouldHaveSize 0
     }
 
     "InMemoryStore test" {

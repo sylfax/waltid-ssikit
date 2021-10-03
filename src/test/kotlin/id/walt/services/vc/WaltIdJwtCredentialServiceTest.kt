@@ -39,7 +39,7 @@ class WaltIdJwtCredentialServiceTest : AnnotationSpec() {
     fun tearDown() {
         // Only required if file-key store is used
 //        val didFilename = "${issuerDid.replace(":", "-")}.json"
-//        Files.delete(Path.of("data", "did", "created", didFilename))
+//        Files.delete(Paths.get("data", "did", "created", didFilename))
         KeyService.getService().delete(keyId.id)
     }
 

@@ -6,17 +6,18 @@ import id.walt.vclib.Helpers.toCredential
 import id.walt.vclib.model.VerifiableCredential
 import io.ktor.util.*
 import java.nio.file.Path
+import java.nio.file.Paths
 
 
 class HKVVcStoreService : VcStoreService() {
 
     private val hkvStore = HKVStoreService.getService()
-    private val vcRoot = Path.of("vc")
+    private val vcRoot = Paths.get("vc")
 
-    private fun getGroupRoot(group: String): Path = vcRoot.combineSafe(Path.of(group)).toPath()
+    private fun getGroupRoot(group: String): Path = vcRoot.combineSafe(Paths.get(group)).toPath()
 
     private fun getStoreKeyFor(id: String, group: String): Path =
-        getGroupRoot(group).combineSafe(Path.of("${id}.cred")).toPath()
+        getGroupRoot(group).combineSafe(Paths.get("${id}.cred")).toPath()
 
     override fun getCredential(id: String, group: String): VerifiableCredential =
         hkvStore.getAsString(getStoreKeyFor(id, group)).toCredential()

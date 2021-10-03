@@ -21,6 +21,7 @@ import id.walt.Values
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.security.Security
 
 enum class CryptoProvider { SUN, TINK, CUSTOM }
@@ -76,13 +77,13 @@ object WaltIdServices {
 
     fun createDirStructure() {
         log.debug { "Creating dir-structure at: $dataDir" }
-        Files.createDirectories(Path.of(keyDir))
-        Files.createDirectories(Path.of("$dataDir/did/created"))
-        Files.createDirectories(Path.of("$dataDir/did/resolved"))
-        Files.createDirectories(Path.of("$dataDir/vc/templates"))
-        Files.createDirectories(Path.of("$dataDir/vc/created"))
-        Files.createDirectories(Path.of("$dataDir/vc/presented"))
-        Files.createDirectories(Path.of(ebsiDir))
+        Files.createDirectories(Paths.get(keyDir))
+        Files.createDirectories(Paths.get("$dataDir/did/created"))
+        Files.createDirectories(Paths.get("$dataDir/did/resolved"))
+        Files.createDirectories(Paths.get("$dataDir/vc/templates"))
+        Files.createDirectories(Paths.get("$dataDir/vc/created"))
+        Files.createDirectories(Paths.get("$dataDir/vc/presented"))
+        Files.createDirectories(Paths.get(ebsiDir))
     }
 
     fun loadConfig() = ConfigLoader.Builder()
