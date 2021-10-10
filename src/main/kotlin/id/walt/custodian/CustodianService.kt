@@ -9,17 +9,26 @@ import id.walt.services.keystore.KeyStoreService
 import id.walt.services.vc.JsonLdCredentialService
 import id.walt.services.vc.JwtCredentialService
 import id.walt.services.vcstore.VcStoreService
-import id.walt.signatory.ProofConfig
-import id.walt.signatory.ProofType
-import id.walt.vclib.Helpers.encode
-import id.walt.vclib.Helpers.toCredential
 import id.walt.vclib.VcLibManager
 import id.walt.vclib.model.VerifiableCredential
-import id.walt.vclib.vclist.VerifiablePresentation
 import mu.KotlinLogging
-import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 private val log = KotlinLogging.logger {}
+
+data class CustodianContext(
+    private val keyService: KeyService = KeyService.getService(),
+    private val keystore: KeyStoreService = KeyStoreService.getService(),
+    private val vcStore: VcStoreService = VcStoreService.getService(),
+    private val jwtCredentialService: JwtCredentialService = JwtCredentialService.getService(),
+    private val jsonLdCredentialService: JsonLdCredentialService = JsonLdCredentialService.getService()
+) {
+
+}
+
+object CustodianContextMapper {
+    val mappings = ConcurrentHashMap<String, CustodianContext>()
+}
 
 abstract class CustodianService : WaltIdService() {
     override val implementation get() = serviceImplementation<CustodianService>()
@@ -68,7 +77,12 @@ open class WaltCustodianService : CustodianService() {
     override fun createPresentation(
         vcs: List<String>, holderDid: String, verifierDid: String?, domain: String?, challenge: String?
     ): String = when {
-        vcs.stream().allMatch { VcLibManager.isJWT(it) } -> jwtCredentialService.present(vcs, holderDid, verifierDid!!, challenge!!)
+        vcs.stream().allMatch { VcLibManager.isJWT(it) } -> jwtCredentialService.present(
+            vcs,
+            holderDid,
+            verifierDid!!,
+            challenge!!
+        )
         vcs.stream().noneMatch { VcLibManager.isJWT(it) } -> jsonLdCredentialService.present(vcs, holderDid, domain, challenge)
         else -> throw IllegalStateException("All verifiable credentials must be of the same proof type.")
     }
