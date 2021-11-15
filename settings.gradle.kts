@@ -1,1 +1,1 @@
-rootProject.name = "waltid-ssi-kit"
+rootProject.name = "waltid-ssi-kit-java11"

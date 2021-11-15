@@ -40,7 +40,7 @@ dependencies {
     implementation("com.google.guava:guava:31.0.1-jre")
 
     // VC
-    implementation("id.walt:waltid-ssikit-vclib:1.5.3")
+    implementation("id.walt:waltid-ssikit-vclib-java11:1.5.3")
 
     // JSON
     implementation("org.json:json:20210307")
@@ -84,7 +84,7 @@ dependencies {
     implementation("com.sksamuel.hoplite:hoplite-hikaricp:1.4.11")
 
     // Service-Matrix
-    implementation("id.walt.servicematrix:WaltID-ServiceMatrix:1.0.1")
+    implementation("id.walt.servicematrix:waltid-servicematrix-java11:1.0.1")
 
     // Kotlin
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.5.21")
@@ -110,12 +110,14 @@ tasks.withType<Test> {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(16))
+        languageVersion.set(JavaLanguageVersion.of(11))
     }
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "15"
+    sourceCompatibility = JavaVersion.VERSION_11.toString()
+    targetCompatibility = JavaVersion.VERSION_11.toString()
+    kotlinOptions.jvmTarget = "11"
 }
 
 tasks.named<CreateStartScripts>("startScripts") {
@@ -149,7 +151,7 @@ publishing {
     publications {
         create<MavenPublication>("mavenJava") {
             pom {
-                name.set("walt.id SSI Kit")
+                name.set("waltid-ssi-kit-java11")
                 description.set("Kotlin/Java library for SSI core services, with primary focus on European EBSI/ESSIF ecosystem.")
                 url.set("https://walt.id")
             }
