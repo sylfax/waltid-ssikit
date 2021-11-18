@@ -10,17 +10,18 @@ plugins {
 }
 
 group = "id.walt"
-version = "1.1-SNAPSHOT"
+version = "1.1-SNAPSHOT-J11"
 
 repositories {
     mavenCentral()
+    mavenLocal()
     //jcenter()
     maven("https://jitpack.io")
     maven("https://repo.danubetech.com/repository/maven-public/")
     maven("https://maven.walt.id/repository/waltid/")
     maven("https://maven.walt.id/repository/waltid-ssi-kit/")
     maven("https://maven.walt.id/repository/danubetech")
-    mavenLocal()
+
 }
 
 dependencies {
@@ -40,7 +41,7 @@ dependencies {
     implementation("com.google.guava:guava:31.0.1-jre")
 
     // VC
-    implementation("id.walt:waltid-ssikit-vclib:1.5.3")
+    implementation("id.walt:waltid-ssikit-vclib:1.5.3-J11")
 
     // JSON
     implementation("org.json:json:20210307")
@@ -84,7 +85,7 @@ dependencies {
     implementation("com.sksamuel.hoplite:hoplite-hikaricp:1.4.11")
 
     // Service-Matrix
-    implementation("id.walt.servicematrix:WaltID-ServiceMatrix:1.0.1")
+    implementation("id.walt.servicematrix:WaltID-ServiceMatrix:1.0.1-J11")
 
     // Kotlin
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.5.21")
@@ -115,7 +116,7 @@ java {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "15"
+    kotlinOptions.jvmTarget = "11"
 }
 
 tasks.named<CreateStartScripts>("startScripts") {

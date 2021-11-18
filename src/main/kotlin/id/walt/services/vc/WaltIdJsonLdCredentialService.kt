@@ -33,6 +33,7 @@ import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
+import kotlin.streams.toList
 
 private val log = KotlinLogging.logger {}
 
