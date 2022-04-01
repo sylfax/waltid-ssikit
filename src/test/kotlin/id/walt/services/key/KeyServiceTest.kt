@@ -2,18 +2,17 @@ package id.walt.services.key
 
 import com.beust.klaxon.Klaxon
 import com.google.crypto.tink.subtle.X25519
-import com.nimbusds.jose.jwk.Curve
-import com.nimbusds.jose.jwk.ECKey
-import com.nimbusds.jose.jwk.JWK
-import com.nimbusds.jose.jwk.KeyUse
+import com.nimbusds.jose.jwk.*
 import com.nimbusds.jose.jwk.gen.ECKeyGenerator
-import id.walt.crypto.KeyAlgorithm
-import id.walt.crypto.newKeyId
+import id.walt.crypto.*
+import id.walt.crypto.Key
 import id.walt.model.Jwk
 import id.walt.servicematrix.ServiceMatrix
+import id.walt.services.CryptoProvider
 import id.walt.services.crypto.CryptoService
 import id.walt.services.crypto.SunCryptoService
 import id.walt.services.keystore.InMemoryKeyStoreService
+import id.walt.services.keystore.KeyStoreService
 import id.walt.services.keystore.KeyType
 import id.walt.test.RESOURCES_PATH
 import io.kotest.core.spec.style.AnnotationSpec
@@ -25,6 +24,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.web3j.crypto.ECDSASignature
 import org.web3j.crypto.ECKeyPair
 import org.web3j.crypto.Keys
+import java.io.File
 import java.math.BigInteger
 import java.security.*
 import java.security.spec.*
@@ -387,5 +387,47 @@ class KeyServiceTest : AnnotationSpec() {
         val jwkExported = keyService.export(kid.id, KeyFormat.JWK)
         print(jwkExported)
         jwkImport shouldBe jwkExported
+    }
+
+    // TODO: refactore and split in multiple test-cases
+    @Test
+    fun testImportEd25519Key() {
+        val privKeyPem = File("src/test/resources/key/privKeyEd25519.pem").readText()
+        val pupKeyPem = File("src/test/resources/key/pubKeyEd25519.pem").readText()
+        val privKey = decodePrivKeyPem(File("src/test/resources/key/privKeyEd25519.pem").readText(), KeyFactory.getInstance("Ed25519"))
+        val pubKey = decodePubKeyPem(File("src/test/resources/key/pubKeyEd25519.pem").readText(), KeyFactory.getInstance("Ed25519"))
+        val privKeyEnc = privKey.toPEM()
+        val pubKeyEnc = pubKey.toPEM()
+
+        privKeyEnc shouldBe privKeyPem
+        pubKeyEnc shouldBe pupKeyPem
+
+        val key = Key(newKeyId(),KeyAlgorithm.EdDSA_Ed25519 , CryptoProvider.SUN, KeyPair(pubKey, privKey) )
+
+        KeyStoreService.getService().store(key)
+
+        val keyLoaded = keyService.load(key.keyId.id)
+
+        keyService.export(key.keyId.id, KeyFormat.PEM, KeyType.PRIVATE) shouldBe privKeyPem
+
+        keyService.export(key.keyId.id, KeyFormat.PEM) shouldBe pupKeyPem
+
+        println(keyLoaded)
+
+        println(keyService.export(key.keyId.id, KeyFormat.JWK))
+
+        println(keyService.export(key.keyId.id, KeyFormat.PEM))
+
+        // deriving pub key - not working
+
+        val keyFactory = KeyFactory.getInstance("Ed25519")
+
+        //val pubKeyInfo = SubjectPublicKeyInfo(AlgorithmIdentifier(EdECObjectIdentifiers.id_Ed25519), pubKey.encoded)
+        val x509KeySpec = X509EncodedKeySpec(pubKey.encoded)
+
+        val pubDerived =  keyFactory.generatePublic(x509KeySpec)
+
+        println(pubDerived)
+
     }
 }
