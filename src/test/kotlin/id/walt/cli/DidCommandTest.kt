@@ -5,6 +5,7 @@ import id.walt.crypto.KeyAlgorithm
 import id.walt.crypto.KeyAlgorithm.*
 import id.walt.crypto.KeyId
 import id.walt.crypto.convertPEMKeyToJWKKey
+import id.walt.crypto.importPem
 import id.walt.servicematrix.ServiceMatrix
 import id.walt.services.did.DidService
 import id.walt.services.key.KeyService
@@ -59,10 +60,11 @@ class DidCommandTest : StringSpec({
     //var didWebRsa: String? = null
     var didKeyRsa: String? = null
     "5. Create did:web RSA" {
-        rsaKeyId = KeyService.getService()
-            .importKey(
-                convertPEMKeyToJWKKey(readWhenContent(Path.of("src/test/resources/key/privkey.pem")))
-            )
+        rsaKeyId = importPem(readWhenContent(Path.of("src/test/resources/key/privkey.pem")))
+//            KeyService.getService()
+//            .importKey(
+//                convertPEMKeyToJWKKey(readWhenContent(Path.of("src/test/resources/key/privkey.pem")))
+//            )
 
         CreateDidCommand().parse(listOf("-m", "web", "-k", rsaKeyId!!.id, "test-dest.json"))
         /*didWebRsa = Path.of("test-dest.json")

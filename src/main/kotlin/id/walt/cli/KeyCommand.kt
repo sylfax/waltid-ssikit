@@ -13,6 +13,7 @@ import id.walt.common.readWhenContent
 import id.walt.crypto.KeyAlgorithm
 import id.walt.crypto.KeyId
 import id.walt.crypto.convertPEMKeyToJWKKey
+import id.walt.crypto.importPem
 import id.walt.services.key.KeyFormat
 import id.walt.services.key.KeyService
 import id.walt.services.keystore.KeyType
@@ -70,11 +71,12 @@ class ImportKeyCommand : CliktCommand(
     override fun run() {
         echo("Importing key from \"$keyFile\"...")
 
-        var keyStr = readWhenContent(keyFile)
+        val keyStr = readWhenContent(keyFile)
 
-        if (keyFile.extension.lowercase() == "pem") keyStr = convertPEMKeyToJWKKey(keyStr)
-
-        val keyId: KeyId = keyService.importKey(keyStr)
+        val keyId = when (keyFile.extension.lowercase() == "pem") {
+            true -> importPem(keyStr)
+            false -> keyService.importKey(keyStr)
+        }
 
         echo("\nResults:\n")
 

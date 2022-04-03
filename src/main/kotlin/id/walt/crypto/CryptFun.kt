@@ -390,7 +390,21 @@ fun toECDSASignature(jcaSignature: ByteArray, keyAlgorithm: KeyAlgorithm): ECDSA
 
 fun convertPEMKeyToJWKKey(keyStr: String): String = JWK.parseFromPEMEncodedObjects(keyStr).toJSONString()
 
-fun importPem(keyStr: String): String {
+/**
+ * Imports the given PEM encoded private and public key strings
+ * @param privKeyStr the private key string
+ * @param pubKeyStr the public key string
+ * @return the imported key id
+ */
+fun importPem(privKeyStr: String, pubKeyStr: String) =
+    importPem(privKeyStr.plus(System.lineSeparator()).plus(pubKeyStr))
+
+/**
+ * Imports the given PEM encoded key string
+ * @param keyStr the key string
+ * @return the imported key id
+ */
+fun importPem(keyStr: String): KeyId {
     val parser = PEMParser(StringReader(keyStr))
     val pemObjs = mutableListOf<Any>()
     try {
@@ -405,7 +419,7 @@ fun importPem(keyStr: String): String {
     val keyPair = getKeyPair(*pemObjs.map { it }.toTypedArray())
     KeyStoreService.getService()
         .store(Key(kid, getKeyAlgorithm(keyPair.public.algorithm), CryptoProvider.SUN, keyPair))
-    return kid.toString()
+    return kid
 }
 
 fun getKeyPair(vararg objs: Any): KeyPair {

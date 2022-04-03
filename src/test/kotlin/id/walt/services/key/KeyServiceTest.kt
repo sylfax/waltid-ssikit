@@ -428,11 +428,13 @@ class KeyServiceTest : AnnotationSpec() {
     }
 
     @Test
-    fun testimportpem(){
-        val pem = File("src/test/resources/key/pem.pem").readText()
-        val kid = importPem(pem)
-        val privKey = keyService.export(kid, KeyFormat.PEM, KeyType.PRIVATE)
-        val pubKey = keyService.export(kid, KeyFormat.PEM)
-        privKey + System.lineSeparator() + pubKey shouldBe pem
+    fun testImportEd25519PEMKey() {
+        val privKeyPem = File("src/test/resources/key/privKeyEd25519.pem").readText()
+        val pubKeyPem = File("src/test/resources/key/pubKeyEd25519.pem").readText()
+        val kid = importPem(privKeyPem, pubKeyPem)
+        val privKey = keyService.export(kid.id, KeyFormat.PEM, KeyType.PRIVATE)
+        val pubKey = keyService.export(kid.id, KeyFormat.PEM)
+        privKey shouldBe privKeyPem
+        pubKey shouldBe pubKeyPem
     }
 }
