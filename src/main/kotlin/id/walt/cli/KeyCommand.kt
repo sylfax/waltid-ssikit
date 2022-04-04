@@ -73,6 +73,7 @@ class ImportKeyCommand : CliktCommand(
 
         val keyStr = readWhenContent(keyFile)
 
+        // TODO replace with importKey
         val keyId = when (keyFile.extension.lowercase() == "pem") {
             true -> importPem(keyStr)
             false -> keyService.importKey(keyStr)

@@ -2,11 +2,7 @@ package id.walt.services.key
 
 import com.beust.klaxon.Klaxon
 import com.google.crypto.tink.subtle.X25519
-import com.nimbusds.jose.jwk.Curve
-import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jose.jwk.JWK
-import com.nimbusds.jose.jwk.KeyUse
-import com.nimbusds.jose.jwk.gen.ECKeyGenerator
 import id.walt.crypto.*
 import id.walt.crypto.Key
 import id.walt.model.Jwk
@@ -167,51 +163,6 @@ class KeyServiceTest : AnnotationSpec() {
         keyService.delete(keyId.id)
     }
 
-    // TODO complete following two tests
-    @Test
-    fun generateJwkNimbus() {
-        // Generate EC key pair in JWK format
-        val jwk: ECKey = ECKeyGenerator(Curve.P_256)
-            .keyUse(KeyUse.SIGNATURE) // indicate the intended use of the key
-            .keyIDFromThumbprint(true)
-            .generate()
-
-        // Output the private and public EC JWK parameters
-        System.out.println(jwk)
-
-        // Output the public EC JWK parameters only
-        System.out.println(jwk.toPublicJWK())
-    }
-
-    @Test
-    fun generateJwkJava() {
-        // Generate EC key pair in JWK format
-        // val kp = keyPairGeneratorSecp256k1().generateKeyPair()
-
-        // val jwk = KeyUtil.make(kp)
-
-        // Output the private and public EC JWK parameters
-        // System.out.println(jwk)
-
-        // Output the public EC JWK parameters only
-        // System.out.println(jwk.toPublicJWK())
-    }
-
-//
-//    @Test
-//    fun generateRsaKeyPairTest() {
-//        val keyService = KeyManagementService
-//        val ks = FileSystemKeyStore
-//        val keyId = keyService.generateKeyPair("RSA")
-//        val key = keyService.loadKeys(keyId)
-//        keyId shouldBe key?.keyId
-//        key?.pair shouldNotBe null
-//        key?.pair?.private shouldNotBe null
-//        key?.pair?.public shouldNotBe null
-//        "RSA" shouldBe key?.pair?.private?.algorithm
-//        keyService.delete(keyId)
-//    }
-
     @Test
     fun keyAgreementTest() {
         val privKey1 = X25519.generatePrivateKey()
@@ -223,73 +174,6 @@ class KeyServiceTest : AnnotationSpec() {
         val sharedSecret2 = String(X25519.computeSharedSecret(privkey2, pubKey1))
 
         sharedSecret1 shouldBe sharedSecret2
-    }
-
-    // https://github.com/AdoptOpenJDK/openjdk-jdk11/blob/master/test/jdk/sun/security/ec/xec/TestXDH.java
-    @Test
-    fun runBasicTests() {
-        runBasicTest("XDH", null)
-        runBasicTest("XDH", 255)
-        runBasicTest("XDH", 448)
-        runBasicTest("XDH", "X25519")
-        runBasicTest("XDH", "X448")
-        runBasicTest("X25519", null)
-        runBasicTest("X448", null)
-        runBasicTest("1.3.101.110", null)
-        runBasicTest("1.3.101.111", null)
-        runBasicTest("OID.1.3.101.110", null)
-        runBasicTest("OID.1.3.101.111", null)
-    }
-
-    @Throws(Exception::class)
-    fun runBasicTest(name: String, param: Any?) {
-        val kpg = KeyPairGenerator.getInstance(name)
-        var paramSpec: AlgorithmParameterSpec? = null
-        if (param is Int) {
-            kpg.initialize(param)
-        } else if (param is String) {
-            paramSpec = NamedParameterSpec(param)
-            kpg.initialize(paramSpec)
-        }
-        val kp = kpg.generateKeyPair()
-        val ka = KeyAgreement.getInstance(name)
-        ka.init(kp.private, paramSpec)
-        ka.doPhase(kp.public, true)
-        val secret = ka.generateSecret()
-        val kf = KeyFactory.getInstance(name)
-        // Test with X509 and PKCS8 key specs
-        val pubSpec = kf.getKeySpec(kp.public, X509EncodedKeySpec::class.java)
-        val priSpec = kf.getKeySpec(kp.private, PKCS8EncodedKeySpec::class.java)
-        val pubKey: PublicKey = kf.generatePublic(pubSpec)
-        val priKey: PrivateKey = kf.generatePrivate(priSpec)
-        ka.init(priKey)
-        ka.doPhase(pubKey, true)
-        val secret2 = ka.generateSecret()
-        if (!Arrays.equals(secret, secret2)) {
-            throw RuntimeException("Arrays not equal")
-        }
-
-        // make sure generateSecret() resets the state to after init()
-        try {
-            ka.generateSecret()
-            throw RuntimeException("generateSecret does not reset state")
-        } catch (ex: IllegalStateException) {
-            // do nothing---this is expected
-        }
-        ka.doPhase(pubKey, true)
-        ka.generateSecret()
-
-        // test with XDH key specs
-        val xdhPublic = kf.getKeySpec(kp.public, XECPublicKeySpec::class.java)
-        val xdhPrivate = kf.getKeySpec(kp.private, XECPrivateKeySpec::class.java)
-        val pubKey2: PublicKey = kf.generatePublic(xdhPublic)
-        val priKey2: PrivateKey = kf.generatePrivate(xdhPrivate)
-        ka.init(priKey2)
-        ka.doPhase(pubKey2, true)
-        val secret3 = ka.generateSecret()
-        if (!Arrays.equals(secret, secret3)) {
-            throw RuntimeException("Arrays not equal")
-        }
     }
 
     @Test
@@ -422,7 +306,7 @@ class KeyServiceTest : AnnotationSpec() {
         KeyStoreService.getService().store(key)
         // assert exporting private part of the key entity is the same as the read file
         keyService.export(key.keyId.id, KeyFormat.PEM, KeyType.PRIVATE) shouldBe privKeyStr
-        // // assert exporting public part of the key entity is the same as the read file
+        // assert exporting public part of the key entity is the same as the read file
         keyService.export(key.keyId.id, KeyFormat.PEM) shouldBe pubKeyStr
         println(keyService.export(key.keyId.id, KeyFormat.PEM))
     }
@@ -436,5 +320,72 @@ class KeyServiceTest : AnnotationSpec() {
         val pubKey = keyService.export(kid.id, KeyFormat.PEM)
         privKey shouldBe privKeyPem
         pubKey shouldBe pubKeyPem
+    }
+
+    // https://github.com/AdoptOpenJDK/openjdk-jdk11/blob/master/test/jdk/sun/security/ec/xec/TestXDH.java
+    @Test
+    fun testKeyAgreementAlgorithms() {
+        runKeyAgreementTest("XDH", null)
+        runKeyAgreementTest("XDH", 255)
+        runKeyAgreementTest("XDH", 448)
+        runKeyAgreementTest("XDH", "X25519")
+        runKeyAgreementTest("XDH", "X448")
+        runKeyAgreementTest("X25519", null)
+        runKeyAgreementTest("X448", null)
+        runKeyAgreementTest("1.3.101.110", null)
+        runKeyAgreementTest("1.3.101.111", null)
+        runKeyAgreementTest("OID.1.3.101.110", null)
+        runKeyAgreementTest("OID.1.3.101.111", null)
+    }
+
+    @Throws(Exception::class)
+    fun runKeyAgreementTest(name: String, param: Any?) {
+        val kpg = KeyPairGenerator.getInstance(name)
+        var paramSpec: AlgorithmParameterSpec? = null
+        if (param is Int) {
+            kpg.initialize(param)
+        } else if (param is String) {
+            paramSpec = NamedParameterSpec(param)
+            kpg.initialize(paramSpec)
+        }
+        val kp = kpg.generateKeyPair()
+        val ka = KeyAgreement.getInstance(name)
+        ka.init(kp.private, paramSpec)
+        ka.doPhase(kp.public, true)
+        val secret = ka.generateSecret()
+        val kf = KeyFactory.getInstance(name)
+        // Test with X509 and PKCS8 key specs
+        val pubSpec = kf.getKeySpec(kp.public, X509EncodedKeySpec::class.java)
+        val priSpec = kf.getKeySpec(kp.private, PKCS8EncodedKeySpec::class.java)
+        val pubKey: PublicKey = kf.generatePublic(pubSpec)
+        val priKey: PrivateKey = kf.generatePrivate(priSpec)
+        ka.init(priKey)
+        ka.doPhase(pubKey, true)
+        val secret2 = ka.generateSecret()
+        if (!Arrays.equals(secret, secret2)) {
+            throw RuntimeException("Arrays not equal")
+        }
+
+        // make sure generateSecret() resets the state to after init()
+        try {
+            ka.generateSecret()
+            throw RuntimeException("generateSecret does not reset state")
+        } catch (ex: IllegalStateException) {
+            // do nothing---this is expected
+        }
+        ka.doPhase(pubKey, true)
+        ka.generateSecret()
+
+        // test with XDH key specs
+        val xdhPublic = kf.getKeySpec(kp.public, XECPublicKeySpec::class.java)
+        val xdhPrivate = kf.getKeySpec(kp.private, XECPrivateKeySpec::class.java)
+        val pubKey2: PublicKey = kf.generatePublic(xdhPublic)
+        val priKey2: PrivateKey = kf.generatePrivate(xdhPrivate)
+        ka.init(priKey2)
+        ka.doPhase(pubKey2, true)
+        val secret3 = ka.generateSecret()
+        if (!Arrays.equals(secret, secret3)) {
+            throw RuntimeException("Arrays not equal")
+        }
     }
 }

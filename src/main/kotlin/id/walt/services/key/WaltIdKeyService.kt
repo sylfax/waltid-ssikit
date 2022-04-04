@@ -47,6 +47,7 @@ open class WaltIdKeyService : KeyService() {
         }
 
     override fun importKey(keyStr: String): KeyId {
+        //TODO: include import from PEM
         val key = parseJwkKey(keyStr)
         log.debug { "Importing key ${key.keyId}" }
         keyStore.store(key)

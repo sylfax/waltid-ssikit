@@ -402,6 +402,8 @@ fun importPem(privKeyStr: String, pubKeyStr: String) =
 /**
  * Imports the given PEM encoded key string
  * @param keyStr the key string
+ *               - for RSA keys: the PEM private key file
+ *               - for other key types: concatenated public and private key in PEM format)
  * @return the imported key id
  */
 fun importPem(keyStr: String): KeyId {
@@ -422,6 +424,9 @@ fun importPem(keyStr: String): KeyId {
     return kid
 }
 
+/**
+ * Parses a keypair out of a one or multiple objects
+ */
 fun getKeyPair(vararg objs: Any): KeyPair {
     lateinit var pubKey: PublicKey
     lateinit var privKey: PrivateKey
