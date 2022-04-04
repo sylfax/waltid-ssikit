@@ -11,14 +11,10 @@ import com.github.ajalt.clikt.parameters.types.enum
 import com.github.ajalt.clikt.parameters.types.path
 import id.walt.common.readWhenContent
 import id.walt.crypto.KeyAlgorithm
-import id.walt.crypto.KeyId
-import id.walt.crypto.convertPEMKeyToJWKKey
-import id.walt.crypto.importPem
 import id.walt.services.key.KeyFormat
 import id.walt.services.key.KeyService
 import id.walt.services.keystore.KeyType
 import java.nio.file.Path
-import kotlin.io.path.extension
 
 private val keyService = KeyService.getService()
 
@@ -73,11 +69,7 @@ class ImportKeyCommand : CliktCommand(
 
         val keyStr = readWhenContent(keyFile)
 
-        // TODO replace with importKey
-        val keyId = when (keyFile.extension.lowercase() == "pem") {
-            true -> importPem(keyStr)
-            false -> keyService.importKey(keyStr)
-        }
+        val keyId = keyService.importKey(keyStr)
 
         echo("\nResults:\n")
 
