@@ -4,14 +4,11 @@ import com.beust.klaxon.Klaxon
 import com.google.crypto.tink.subtle.X25519
 import com.nimbusds.jose.jwk.JWK
 import id.walt.crypto.*
-import id.walt.crypto.Key
 import id.walt.model.Jwk
 import id.walt.servicematrix.ServiceMatrix
-import id.walt.services.CryptoProvider
 import id.walt.services.crypto.CryptoService
 import id.walt.services.crypto.SunCryptoService
 import id.walt.services.keystore.InMemoryKeyStoreService
-import id.walt.services.keystore.KeyStoreService
 import id.walt.services.keystore.KeyType
 import id.walt.test.RESOURCES_PATH
 import io.kotest.core.spec.style.AnnotationSpec
@@ -277,6 +274,48 @@ class KeyServiceTest : AnnotationSpec() {
     }
 
     @Test
+    fun testImportEd25519PEMKey() {
+        val privKeyPem = File("src/test/resources/key/privKeyEd25519.pem").readText()
+        val pubKeyPem = File("src/test/resources/key/pubKeyEd25519.pem").readText()
+        val kid = keyService.importKey(privKeyPem.plus(System.lineSeparator()).plus(pubKeyPem))
+        val privKey = keyService.export(kid.id, KeyFormat.PEM, KeyType.PRIVATE)
+        val pubKey = keyService.export(kid.id, KeyFormat.PEM)
+        privKey shouldBe privKeyPem
+        pubKey shouldBe pubKeyPem
+    }
+
+    @Test
+    fun testImportRSAPEMPrivKey(){
+        val keyStr = File("src/test/resources/key/privkey.pem").readText()
+        val kid = keyService.importKey(keyStr)
+        val privKey = keyService.export(kid.id, KeyFormat.PEM, KeyType.PRIVATE)
+        privKey shouldBe keyStr
+    }
+
+    @Test
+    fun testImportRSAPEMKeys(){
+        val privKeyPem = File("src/test/resources/key/privkey.pem").readText()
+        val pubKeyPem = File("src/test/resources/key/pubkey.pem").readText()
+        val kid = keyService.importKey(privKeyPem.plus(System.lineSeparator()).plus(pubKeyPem))
+        val privKey = keyService.export(kid.id, KeyFormat.PEM, KeyType.PRIVATE)
+        val pubKey = keyService.export(kid.id, KeyFormat.PEM, KeyType.PUBLIC)
+        privKey shouldBe privKeyPem
+        pubKey shouldBe pubKeyPem
+    }
+
+//    @Test TODO: key factory for Secp256k1 algorithm not available
+    @Test
+    fun testImportSecp256k1PEMKey(){
+        val privKeyPem = File("src/test/resources/key/privKeySecp256k1.pem").readText()
+        val pubKeyPem = File("src/test/resources/key/pubKeySecp256k1.pem").readText()
+        val kid = keyService.importKey(privKeyPem.plus(System.lineSeparator()).plus(pubKeyPem))
+        val privKey = keyService.export(kid.id, KeyFormat.PEM, KeyType.PRIVATE)
+        val pubKey = keyService.export(kid.id, KeyFormat.PEM)
+        privKey shouldBe privKeyPem
+        pubKey shouldBe pubKeyPem
+    }
+
+    @Test
     fun testDecodeEd25519PEMPrivateKey(){
         val keyStr = File("src/test/resources/key/privKeyEd25519.pem").readText()
         val key = decodePrivKeyPem(keyStr, KeyFactory.getInstance("Ed25519"))
@@ -293,33 +332,11 @@ class KeyServiceTest : AnnotationSpec() {
     }
 
     @Test
-    fun testStoreEd25519PEMKey(){
-        // read files
-        val privKeyStr = File("src/test/resources/key/privKeyEd25519.pem").readText()
-        val pubKeyStr = File("src/test/resources/key/pubKeyEd25519.pem").readText()
-        // decode keys
-        val privKey = decodePrivKeyPem(privKeyStr, KeyFactory.getInstance("Ed25519"))
-        val pubKey = decodePubKeyPem(pubKeyStr, KeyFactory.getInstance("Ed25519"))
-        // create a new key entity using the raw keys
-        val key = Key(newKeyId(),KeyAlgorithm.EdDSA_Ed25519 , CryptoProvider.SUN, KeyPair(pubKey, privKey) )
-        // store the key entity
-        KeyStoreService.getService().store(key)
-        // assert exporting private part of the key entity is the same as the read file
-        keyService.export(key.keyId.id, KeyFormat.PEM, KeyType.PRIVATE) shouldBe privKeyStr
-        // assert exporting public part of the key entity is the same as the read file
-        keyService.export(key.keyId.id, KeyFormat.PEM) shouldBe pubKeyStr
-        println(keyService.export(key.keyId.id, KeyFormat.PEM))
-    }
-
-    @Test
-    fun testImportEd25519PEMKey() {
-        val privKeyPem = File("src/test/resources/key/privKeyEd25519.pem").readText()
-        val pubKeyPem = File("src/test/resources/key/pubKeyEd25519.pem").readText()
-        val kid = keyService.importKey(privKeyPem.plus(System.lineSeparator()).plus(pubKeyPem))
-        val privKey = keyService.export(kid.id, KeyFormat.PEM, KeyType.PRIVATE)
-        val pubKey = keyService.export(kid.id, KeyFormat.PEM)
-        privKey shouldBe privKeyPem
-        pubKey shouldBe pubKeyPem
+    fun testDecodeSecp256k1PEMPublicKey(){
+        val keyStr = File("src/test/resources/key/pubKeySecp256k1.pem").readText()
+        val key = decodePubKeyPem(keyStr, KeyFactory.getInstance("Secp256k1"))
+        val keyEnc = key.toPEM()
+        keyEnc shouldBe keyStr
     }
 
     // https://github.com/AdoptOpenJDK/openjdk-jdk11/blob/master/test/jdk/sun/security/ec/xec/TestXDH.java

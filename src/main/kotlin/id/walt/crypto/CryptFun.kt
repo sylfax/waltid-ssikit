@@ -46,8 +46,8 @@ enum class KeyAlgorithm {
 
     companion object {
         fun fromString(algorithm: String): KeyAlgorithm = when (algorithm) {
-            "Ed25519", "EdDSA_Ed25519" -> EdDSA_Ed25519
-            "Secp256k1", "ECDSA_Secp256k1" -> ECDSA_Secp256k1
+            "EdDSA", "Ed25519", "EdDSA_Ed25519" -> EdDSA_Ed25519
+            "ECDSA", "Secp256k1", "ECDSA_Secp256k1" -> ECDSA_Secp256k1
             "RSA" -> RSA
             else -> throw IllegalArgumentException("Algorithm not supported")
         }
@@ -87,14 +87,14 @@ fun java.security.Key.toPEM(): String = when (this) {
 }
 
 fun PrivateKey.toPEM(): String =
-            "-----BEGIN PRIVATE KEY-----" +
+            "-----BEGIN${getPrivateKeyPEMDeclaration(this.algorithm)}PRIVATE KEY-----" +
             System.lineSeparator() +
             String(
                 Base64.getMimeEncoder(64, System.lineSeparator().toByteArray())
                     .encode(PKCS8EncodedKeySpec(this.encoded).encoded)
             ) +
             System.lineSeparator() +
-            "-----END PRIVATE KEY-----"
+            "-----END${getPrivateKeyPEMDeclaration(this.algorithm)}PRIVATE KEY-----"
 
 
 fun PrivateKey.toBase64(): String = String(Base64.getEncoder().encode(PKCS8EncodedKeySpec(this.encoded).encoded))
@@ -383,3 +383,10 @@ fun toECDSASignature(jcaSignature: ByteArray, keyAlgorithm: KeyAlgorithm): ECDSA
 }
 
 fun convertPEMKeyToJWKKey(keyStr: String): String = JWK.parseFromPEMEncodedObjects(keyStr).toJSONString()
+
+fun getPrivateKeyPEMDeclaration(alg: String) = when (alg) {
+    "RSA" -> " RSA "
+    "EdDSA", "Ed25519" -> " "
+    "ECDSA", "Secp256k1" -> " EC "
+    else -> TODO()
+}

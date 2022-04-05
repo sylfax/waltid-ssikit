@@ -25,8 +25,8 @@ interface KeyImportStrategy {
 abstract class KeyImportFactory {
     companion object {
         fun create(keyString: String) = when (isPEM(keyString)) {
-            true -> PEMImportStrategyImpl(keyString)
-            false -> JWKImportStrategyImpl(keyString)
+            true -> PEMImportImpl(keyString)
+            false -> JWKImportImpl(keyString)
         }
 
         //TODO check using some sort of parser
@@ -34,13 +34,14 @@ abstract class KeyImportFactory {
     }
 }
 
-class PEMImportStrategyImpl(val keyString: String) : KeyImportStrategy {
+class PEMImportImpl(val keyString: String) : KeyImportStrategy {
 
     override fun import(keyStore: KeyStoreService) = importPem(keyString, keyStore)
 
     /**
      * Imports the given PEM encoded key string
      * @param keyStr the key string
+     *
      *               - for RSA keys: the PEM private key file
      *               - for other key types: concatenated public and private key in PEM format)
      * @return the imported key id
@@ -58,7 +59,7 @@ class PEMImportStrategyImpl(val keyString: String) : KeyImportStrategy {
         }
         val kid = newKeyId()
         val keyPair = getKeyPair(*pemObjs.map { it }.toTypedArray())
-        keyStore.store(Key(kid, getKeyAlgorithm(keyPair.public.algorithm), CryptoProvider.SUN, keyPair))
+        keyStore.store(Key(kid, KeyAlgorithm.fromString(keyPair.public.algorithm), CryptoProvider.SUN, keyPair))
         return kid
     }
 
@@ -97,17 +98,12 @@ class PEMImportStrategyImpl(val keyString: String) : KeyImportStrategy {
     private fun getKeyFactory(alg: ASN1ObjectIdentifier): KeyFactory = when (alg) {
         PKCSObjectIdentifiers.rsaEncryption -> KeyFactory.getInstance("RSA")
         ASN1ObjectIdentifier("1.3.101.112") -> KeyFactory.getInstance("Ed25519")
-        else -> TODO()
-    }
-
-    private fun getKeyAlgorithm(alg: String): KeyAlgorithm = when (alg) {
-        "RSA" -> KeyAlgorithm.RSA
-        "EdDSA", "Ed25519" -> KeyAlgorithm.EdDSA_Ed25519
+        ASN1ObjectIdentifier("1.2.840.10045.2.1") -> KeyFactory.getInstance("ECDSA")
         else -> TODO()
     }
 }
 
-class JWKImportStrategyImpl(val keyString: String) : KeyImportStrategy {
+class JWKImportImpl(val keyString: String) : KeyImportStrategy {
 
     override fun import(keyStore: KeyStoreService): KeyId {
         val key = parseJwkKey(keyString)
